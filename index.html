@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Enviar texto a Lambda (Polly)</title>
+</head>
+<body>
+  <h2>Generar Audio con Polly</h2>
+
+  <form id="audioForm">
+    <label for="usuarioId">ID de Usuario:</label><br>
+    <input type="text" id="usuarioId" name="usuarioId" required><br><br>
+
+    <label for="texto">Texto a convertir en audio:</label><br>
+    <textarea id="texto" name="texto" rows="4" cols="50" required></textarea><br><br>
+
+    <button type="submit">Enviar</button>
+  </form>
+
+  <h3>Respuesta del servidor:</h3>
+  <pre id="respuesta"></pre>
+
+  <script>
+    const form = document.getElementById("audioForm");
+    const respuesta = document.getElementById("respuesta");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Datos del formulario
+      const data = {
+        usuarioId: document.getElementById("usuarioId").value,
+        texto: document.getElementById("texto").value
+      };
+
+      try {
+        const res = await fetch("https://yrqekh84r4.execute-api.us-east-1.amazonaws.com/tec/tecnologias-api", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+        respuesta.textContent = JSON.stringify(json, null, 2);
+
+        // Si devuelve un audio, mostramos el reproductor
+        if (json.audioUrl) {
+          const audioPlayer = document.createElement("audio");
+          audioPlayer.controls = true;
+          audioPlayer.src = json.audioUrl;
+          respuesta.appendChild(document.createElement("br"));
+          respuesta.appendChild(audioPlayer);
+        }
+
+      } catch (err) {
+        respuesta.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
